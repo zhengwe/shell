@@ -1,0 +1,76 @@
+#!/bin/bash
+
+set -e
+
+# 停止防火墙
+systemctl stop firewalld
+systemctl disable firewalld
+
+# 关闭SWAP
+swapoff -a && sysctl -w vm.swappiness=0
+sed -ri '/^[^#]*swap/s@^@#@' /etc/fstab
+
+# 停止SELINUX
+setenforce 0
+sed -ri '/^[^#]*SELINUX=/s#=.+$#=disabled#' /etc/selinux/config
+
+# 系统参数设置
+cat > /etc/sysctl.conf <<EOF
+net.ipv4.ip_forward = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+modprobe br_netfilter
+sysctl -p
+
+# 安装ipvs模块
+function module(){
+cat >> /etc/modules-load.d/ipvs.conf <<EOF
+module=(
+ip_vs
+ip_vs_rr
+ip_vs_wrr
+ip_vs_sh
+nf_conntrack
+br_netfilter
+  )
+EOF
+}
+yum install ipset ipvsadm conntrack -y
+
+# 安装docker
+function docker(){
+yum -y install yum-utils
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum install docker-ce-18.06.3.ce -y
+systemctl start docker && systemctl enable docker
+
+cat > /etc/docker/daemon.json <<EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "registry-mirrors": ["https://registry.docker-cn.com"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2",
+  "storage-opts": [
+    "overlay2.override_kernel_check=true"
+  ]
+}
+EOF
+systemctl restart docker
+}
+
+# 升级内核
+function kernel(){
+rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+yum --enablerepo=elrepo-kernel install kernel-ml -y
+grub2-mkconfig -o /boot/grub2/grub.cfg
+}
+
+# 依次执行
+module
+docker
+kernel
