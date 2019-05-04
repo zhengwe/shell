@@ -38,6 +38,9 @@ EOF
 }
 yum install ipset ipvsadm conntrack -y
 
+# 安装ntpdate
+yum install ntpdate -y
+
 # 安装docker
 function docker(){
 yum -y install yum-utils
