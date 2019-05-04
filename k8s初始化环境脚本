@@ -39,6 +39,7 @@ EOF
 yum install ipset ipvsadm conntrack -y
 
 # 安装ntpdate
+# ntpdate cn.ntp.org.cn
 yum install ntpdate -y
 
 # 安装docker
