@@ -25,22 +25,15 @@ sysctl -p
 
 # 安装ipvs模块
 function module(){
-cat >> /etc/modules-load.d/ipvs.conf <<EOF
-module=(
+cat >> /etc/modules <<EOF
 ip_vs
 ip_vs_rr
 ip_vs_wrr
 ip_vs_sh
 nf_conntrack
-br_netfilter
-  )
 EOF
 }
 yum install ipset ipvsadm conntrack -y
-
-# 安装ntpdate
-# ntpdate cn.ntp.org.cn
-yum install ntpdate -y
 
 # 安装docker
 function docker(){
@@ -73,6 +66,10 @@ rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
 yum --enablerepo=elrepo-kernel install kernel-ml -y
 grub2-mkconfig -o /boot/grub2/grub.cfg
 }
+
+# 安装ntpdate
+# ntpdate cn.ntp.org.cn
+yum install ntpdate -y
 
 # 依次执行
 module
