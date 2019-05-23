@@ -4,6 +4,9 @@ Asia/Shanghai
 EOF
 sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
+apt install -y ntpdate
+ntpdate cn.ntp.org.cn
+
 cat >> /etc/hosts <<EOF
 192.168.250.60 k8s-m1
 192.168.250.61 k8s-m2
@@ -60,3 +63,21 @@ mv cfssl-certinfo_linux-amd64 /usr/local/bin/cfssl-certinfo
 wget https://github.com/etcd-io/etcd/releases/download/v3.3.12/etcd-v3.3.12-linux-amd64.tar.gz
 tar xf etcd-v3.3.12-linux-amd64.tar.gz
 cp etcd-v3.3.12-linux-amd64/{etcd,etcdctl} /usr/local/bin
+
+cat >> /etc/modules <<EOF
+ip_vs
+ip_vs_lc
+ip_vs_wlc
+ip_vs_rr
+ip_vs_wrr
+ip_vs_lblc
+ip_vs_lblcr
+ip_vs_dh
+ip_vs_sh
+ip_vs_fo
+ip_vs_nq
+ip_vs_sed
+ip_vs_ftp
+EOF
+
+apt install -y conntrack ipvsadm
