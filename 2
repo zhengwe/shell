@@ -1,4 +1,9 @@
 #!/bin/bash
+cat >> /etc/timezone <<EOF
+Asia/Shanghai
+EOF
+sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
 cat >> /etc/hosts <<EOF
 192.168.250.60 k8s-m1
 192.168.250.61 k8s-m2
