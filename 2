@@ -27,6 +27,23 @@ EOF
 
 modprobe br_netfilter && sysctl -p
 
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+
+cat > /etc/apt/sources.list << EOF
+deb http://mirrors.aliyun.com/ubuntu/ xenial main
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial main
+deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates main
+deb http://mirrors.aliyun.com/ubuntu/ xenial universe
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial universe
+deb http://mirrors.aliyun.com/ubuntu/ xenial-updates universe
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates universe
+deb http://mirrors.aliyun.com/ubuntu/ xenial-security main
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security main
+deb http://mirrors.aliyun.com/ubuntu/ xenial-security universe
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security universe
+EOF
+
 # 安装docker
 sudo apt-get remove docker docker-engine docker.io containerd runc
 sudo apt-get update
@@ -45,6 +62,7 @@ cat > /etc/docker/daemon.json <<EOF
     "max-size": "100m"
   },
   "storage-driver": "overlay2"
+  "storage-opts": ["overlay2.override_kernel_check=true"]
 }
 EOF
 
